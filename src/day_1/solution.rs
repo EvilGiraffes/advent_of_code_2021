@@ -60,12 +60,15 @@ impl Implementations for Day1 {
                 }
                 Some(sum)
             })
-            .fold(PreviousContext::default(), |acc: PreviousContext, current: u32| -> _ {
-                if acc.previous >= current {
-                    return acc.with_new_current(current);
-                }
-                acc.with_incremented_count(current)
-            })
+            .fold(
+                PreviousContext::default(),
+                |acc: PreviousContext, current: u32| -> _ {
+                    if acc.previous >= current {
+                        return acc.with_new_current(current);
+                    }
+                    acc.with_incremented_count(current)
+                },
+            )
             .count;
         println!("{}", result);
         Ok(())
@@ -92,7 +95,7 @@ impl PreviousContext {
     }
 }
 
-impl Default for PreviousContext{
+impl Default for PreviousContext {
     fn default() -> Self {
         PreviousContext {
             previous: u32::MAX,

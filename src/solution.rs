@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::fmt::{self, Debug, Display, Formatter};
 
 pub trait Solution {
     fn execute_act(&self, act: Act) -> Result<(), UnableToExecuteActError>;
@@ -21,25 +21,26 @@ where
     }
 }
 
-fn extract_reason(optional_reason: &Option<String>) -> String {
-    match optional_reason {
-        Some(reason) => reason.clone(),
-        None => "".to_owned(),
-    }
-}
+pub trait ExecutionContext: Display + Debug {}
+impl<T> ExecutionContext for T where T: Display + Debug {}
+
 
 #[derive(Debug, Clone)]
 pub enum UnableToExecuteActError {
     NotImplemented,
-    FailedToExecute(Option<String>),
+    FailedToExecute(Option<&'static dyn ExecutionContext>),
 }
 
-
 impl Display for UnableToExecuteActError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             Self::NotImplemented => write!(f, "not implemented"),
-            Self::FailedToExecute(reason) => write!(f, "failed to execute act{}", extract_reason(&reason)),
+            Self::FailedToExecute(reason) => {
+                match reason {
+                    Some(inner) => write_seperated(f, " ", &inner),
+                    None => write_seperated(f, "", ""),
+                }
+            }
         }
     }
 }
@@ -57,4 +58,9 @@ impl Act {
             _ => None,
         }
     }
+}
+
+fn write_seperated<T>(f: &mut Formatter<'_>,seperator: &str, value: &T) -> fmt::Result
+where T : Display + ?Sized{
+    write!(f, "failed to execute act{}{}", seperator, value)
 }

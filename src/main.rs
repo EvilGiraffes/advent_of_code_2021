@@ -5,10 +5,12 @@ use std::process;
 use clap::Parser;
 use day_1::solution::Day1;
 use day_2::solution::Day2;
-use solution::{Act, Solution};
+use solution::Act;
+
 mod day_1;
 mod day_2;
 mod solution;
+mod construction;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -19,7 +21,9 @@ struct RunOptions {
     act: u8,
 }
 
-fn get_solution_from_day(day: u8) -> Option<Box<dyn Solution>> {
+type OptionalSolution = Option<Box<dyn solution::Solution>>;
+
+fn solution_from_day(day: u8) -> OptionalSolution {
     match day {
         1 => Some(Day1::new_boxed()),
         2 => Some(Day2::new_boxed()),
@@ -30,7 +34,7 @@ fn get_solution_from_day(day: u8) -> Option<Box<dyn Solution>> {
 fn main() {
     let run_options = RunOptions::parse();
     let chosen_solution =
-        get_solution_from_day(run_options.day).unwrap_or_else(|| {
+        solution_from_day(run_options.day).unwrap_or_else(|| {
         println!("You did not provide a valid day.");
         process::exit(69);
     });
